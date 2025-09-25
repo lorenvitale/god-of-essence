@@ -44,7 +44,7 @@ a {
   min-height: 55vh;
   display: grid;
   place-content: center;
-  padding: 4rem 1.5rem;
+  padding: 4rem 1.5rem 5rem;
   text-align: center;
   overflow: hidden;
 }
@@ -60,22 +60,89 @@ a {
 .hero__content {
   position: relative;
   z-index: 1;
-  max-width: 680px;
+  max-width: 760px;
   margin-inline: auto;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.6rem;
 }
 
-.hero h1 {
+.hero__brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+}
+
+@media (max-width: 640px) {
+  .hero__brand {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero__title {
+    letter-spacing: 0.24em;
+  }
+}
+
+.hero__logo {
+  width: clamp(86px, 18vw, 120px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  background: radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.55), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(121, 62, 255, 0.55), transparent 65%),
+    linear-gradient(135deg, rgba(11, 15, 25, 0.9), rgba(30, 12, 60, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 30px 80px rgba(10, 8, 20, 0.55);
+  position: relative;
+}
+
+.hero__logo::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 36px;
+  background: radial-gradient(circle, rgba(242, 183, 5, 0.18), transparent 65%);
+  filter: blur(10px);
+  opacity: 0.8;
+  z-index: -1;
+}
+
+.hero__logo svg {
+  width: 70%;
+  height: 70%;
+}
+
+.hero__title {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  letter-spacing: 0.12em;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  letter-spacing: 0.32em;
   text-transform: uppercase;
+  text-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.hero__subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
 }
 
 .hero p {
   color: var(--text-muted);
-  font-size: 1.1rem;
+  font-size: 1.08rem;
+}
+
+.hero__actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero__actions .btn {
+  min-width: clamp(180px, 28vw, 220px);
 }
 
 .layout {
@@ -582,9 +649,51 @@ input[type="range"]::-moz-range-thumb {
   border-radius: var(--radius);
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  min-width: min(520px, 90vw);
+  min-width: min(720px, 92vw);
+  display: grid;
+  gap: 1.75rem;
+}
+
+.modal__grid {
   display: grid;
   gap: 1.5rem;
+}
+
+@media (min-width: 860px) {
+  .modal__grid {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  }
+}
+
+.modal__column {
+  display: grid;
+  gap: 1rem;
+}
+
+.modal__column h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.modal__hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.modal__hint--small {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.modal__empty {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
 }
 
 .modal__content ul {
@@ -601,6 +710,7 @@ input[type="range"]::-moz-range-thumb {
   padding: 0.85rem 1rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .modal__content .meta {
@@ -614,9 +724,62 @@ input[type="range"]::-moz-range-thumb {
   gap: 0.5rem;
 }
 
+.upload-card {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  padding: 1.8rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px dashed rgba(242, 183, 5, 0.45);
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.upload-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 222, 107, 0.85);
+  background: rgba(242, 183, 5, 0.12);
+}
+
+.upload-card.is-highlighted {
+  animation: uploadPulse 1.2s ease-in-out 2;
+}
+
+.upload-card__icon {
+  font-size: 2rem;
+}
+
+.upload-card__label {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.upload-card__hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
 .modal__actions {
   display: flex;
   justify-content: flex-end;
+}
+
+@keyframes uploadPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(242, 183, 5, 0.2);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(242, 183, 5, 0.35);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(242, 183, 5, 0.2);
+  }
 }
 
 .toast {

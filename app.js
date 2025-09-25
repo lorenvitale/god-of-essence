@@ -13,6 +13,7 @@ const EXTERNAL_LIBRARY_ENDPOINTS = [
   "https://raw.githubusercontent.com/katarzynaq/perfume-library/main/library.json",
 ];
 const essenceIndex = new Map();
+const essenceNameIndex = new Map();
 
 const elements = {
   essenceList: document.querySelector("#essence-list"),
@@ -21,6 +22,7 @@ const elements = {
   workspaceIntro: document.querySelector("#workspace-intro"),
   workspace: document.querySelector("#workspace"),
   startBuilder: document.querySelector("#start-builder"),
+  heroLoadFormula: document.querySelector("#open-import"),
   composition: document.querySelector("#composition"),
   compositionSummary: document.querySelector("#composition-summary"),
   clearSelection: document.querySelector("#clear-selection"),
@@ -278,6 +280,7 @@ const FragranceAI = (() => {
 init();
 
 function init() {
+  configurePdfWorker();
   rebuildEssenceIndex();
   renderFamilyPills();
   renderEssenceList();
@@ -289,9 +292,19 @@ function init() {
   syncExternalLibraries();
 }
 
+function configurePdfWorker() {
+  if (window.pdfjsLib?.GlobalWorkerOptions) {
+    const workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js";
+    if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+    }
+  }
+}
+
 function bindEvents() {
   elements.searchInput.addEventListener("input", renderEssenceList);
   elements.startBuilder.addEventListener("click", startFormula);
+  elements.heroLoadFormula?.addEventListener("click", () => openSavedModal({ focusImport: true }));
   elements.clearSelection.addEventListener("click", clearComposition);
   elements.rating.addEventListener("input", () => {
     markManual(elements.rating);
@@ -347,8 +360,13 @@ function resetAIOverrides() {
 
 function rebuildEssenceIndex() {
   essenceIndex.clear();
+  essenceNameIndex.clear();
   ESSENCES.forEach((essence) => {
     essenceIndex.set(essence.id, essence);
+    essenceNameIndex.set(normalizeLabel(essence.name), essence);
+    toArray(essence.aliases).forEach((alias) => {
+      essenceNameIndex.set(normalizeLabel(alias), essence);
+    });
   });
 }
 
@@ -709,61 +727,31 @@ function persistLastFormula() {
   localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
 }
 
-function openSavedModal() {
-  const stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
-  if (stored.length === 0) {
-    showToast("Nessuna formula salvata ancora");
-    return;
-  }
-
+function openSavedModal({ focusImport = false } = {}) {
   let modal = document.querySelector("#saved-formulas-modal");
   if (!modal) {
     const fragment = templates.savedModal.content.cloneNode(true);
     document.body.appendChild(fragment);
     modal = document.querySelector("#saved-formulas-modal");
+    const fileInput = modal.querySelector("#external-formula-file");
     modal.querySelector("#close-saved").addEventListener("click", () => modal.close());
     modal.addEventListener("close", () => modal.removeAttribute("open"));
+    modal.querySelector("#saved-formulas-list").addEventListener("click", handleSavedFormulaAction);
+    fileInput.addEventListener("change", handleExternalFormulaSelection);
   }
 
-  const list = modal.querySelector("#saved-formulas-list");
-  list.innerHTML = "";
-
-  stored
-    .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt))
-    .forEach((formula, index) => {
-      const li = document.createElement("li");
-      const rating = formula.analysis?.rating ?? formula.rating ?? "—";
-      li.innerHTML = `
-        <div>
-          <strong>${formula.name}</strong>
-          <div class="meta">${formula.type} · ${formula.volume} ml · ⭐ ${rating}</div>
-          <div class="meta">${new Date(formula.savedAt).toLocaleString()}</div>
-        </div>
-        <div class="modal-buttons">
-          <button class="btn btn--ghost" data-action="load" data-index="${index}">Carica</button>
-          <button class="btn btn--ghost" data-action="delete" data-index="${index}">Elimina</button>
-        </div>`;
-      list.appendChild(li);
-    });
-
-  list.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      const action = event.currentTarget.dataset.action;
-      const index = Number(event.currentTarget.dataset.index);
-      if (action === "load") {
-        populateFormula(stored[index]);
-        modal.close();
-        revealWorkspace();
-      } else if (action === "delete") {
-        stored.splice(index, 1);
-        localStorage.setItem("god-of-essence:formulas", JSON.stringify(stored));
-        openSavedModal();
-      }
-    });
-  });
+  const stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
+  renderSavedModalContent(modal, stored);
 
   if (typeof modal.showModal === "function") {
     modal.showModal();
+    if (focusImport) {
+      const card = modal.querySelector(".upload-card");
+      if (card) {
+        card.classList.add("is-highlighted");
+        setTimeout(() => card.classList.remove("is-highlighted"), 1400);
+      }
+    }
   }
 }
 
@@ -773,6 +761,294 @@ function duplicateFormula() {
   current.savedAt = new Date().toISOString();
   populateFormula(current);
   showToast("Formula duplicata, personalizza liberamente");
+}
+
+function renderSavedModalContent(modal, stored = []) {
+  const list = modal.querySelector("#saved-formulas-list");
+  const emptyState = modal.querySelector("#saved-formulas-empty");
+  list.innerHTML = "";
+
+  if (!stored.length) {
+    emptyState?.removeAttribute("hidden");
+    return;
+  }
+
+  emptyState?.setAttribute("hidden", "");
+
+  const decorated = stored.map((formula, index) => ({ formula, index }));
+  decorated
+    .sort((a, b) => new Date(b.formula.savedAt || 0) - new Date(a.formula.savedAt || 0))
+    .forEach(({ formula, index }) => {
+      const li = document.createElement("li");
+      const rating = formula.analysis?.rating ?? formula.rating ?? "—";
+      const volumeLabel = formatNumber(formula.volume);
+      const savedLabel = formatTimestamp(formula.savedAt) || "—";
+      li.innerHTML = `
+        <div>
+          <strong>${formula.name || "Formula senza nome"}</strong>
+          <div class="meta">${formula.type || "—"} · ${volumeLabel} ml · ⭐ ${rating}</div>
+          <div class="meta">${savedLabel}</div>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn btn--ghost" data-action="load" data-index="${index}">Carica</button>
+          <button class="btn btn--ghost" data-action="delete" data-index="${index}">Elimina</button>
+        </div>`;
+      list.appendChild(li);
+    });
+}
+
+function handleSavedFormulaAction(event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  const action = button.dataset.action;
+  const index = Number(button.dataset.index);
+  const modal = event.currentTarget.closest("dialog");
+  const stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
+  if (Number.isNaN(index) || !stored[index]) {
+    showToast("Formula non trovata");
+    return;
+  }
+
+  if (action === "load") {
+    populateFormula(stored[index]);
+    modal?.close();
+    revealWorkspace();
+  } else if (action === "delete") {
+    stored.splice(index, 1);
+    localStorage.setItem("god-of-essence:formulas", JSON.stringify(stored));
+    renderSavedModalContent(modal, stored);
+  }
+}
+
+async function handleExternalFormulaSelection(event) {
+  const input = event.target;
+  const file = input.files?.[0];
+  if (!file) return;
+  await importExternalFormula(file);
+  input.value = "";
+}
+
+async function importExternalFormula(file) {
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+  let parsed = null;
+
+  try {
+    if (extension === "pdf") {
+      parsed = await parseFormulaPdf(file);
+    } else if (extension === "xlsx" || extension === "xls") {
+      parsed = await parseFormulaSpreadsheet(file);
+    } else if (extension === "csv") {
+      parsed = await parseFormulaSpreadsheet(file, { isCsv: true });
+    } else {
+      showToast("Formato non supportato. Usa PDF, XLSX, XLS o CSV");
+      return;
+    }
+  } catch (error) {
+    console.error("Errore durante la lettura del file", error);
+    showToast("Impossibile leggere il file selezionato");
+    return;
+  }
+
+  if (!parsed) {
+    showToast("Formato del file non riconosciuto");
+    return;
+  }
+
+  const result = buildFormulaFromImport(parsed);
+  if (!result || result.formula.components.length === 0) {
+    showToast("Nessuna materia prima riconosciuta nel file caricato");
+    return;
+  }
+
+  populateFormula(result.formula);
+  persistLastFormula();
+  revealWorkspace();
+  const modal = document.querySelector("#saved-formulas-modal");
+  if (modal?.open) {
+    modal.close();
+  }
+
+  let message = `Formula "${result.formula.name}" importata`;
+  if (result.missing.length) {
+    const preview = result.missing.slice(0, 3).join(", ");
+    message += ` (ingredienti non trovati: ${preview}${result.missing.length > 3 ? "…" : ""})`;
+  }
+  showToast(message);
+}
+
+async function parseFormulaPdf(file) {
+  if (!window.pdfjsLib) {
+    throw new Error("pdfjsLib non disponibile");
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let textContent = "";
+  const pages = Math.min(pdf.numPages, 8);
+  for (let pageNumber = 1; pageNumber <= pages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str).join(" ");
+    textContent += `${pageText}\n`;
+  }
+  return parseFormulaFromText(textContent);
+}
+
+async function parseFormulaSpreadsheet(file, { isCsv = false } = {}) {
+  if (typeof XLSX === "undefined") {
+    throw new Error("Libreria XLSX non disponibile");
+  }
+  let workbook;
+  if (isCsv) {
+    const text = await file.text();
+    workbook = XLSX.read(text, { type: "string" });
+  } else {
+    const buffer = await file.arrayBuffer();
+    workbook = XLSX.read(buffer, { type: "array" });
+  }
+
+  const firstSheet = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[firstSheet];
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return null;
+  }
+  return interpretTabularRows(rows);
+}
+
+function interpretTabularRows(rows) {
+  const summary = {
+    components: [],
+  };
+
+  rows.forEach((row) => {
+    const normalized = Object.entries(row).reduce((acc, [key, value]) => {
+      const cleanKey = normalizeLabel(key);
+      if (cleanKey) {
+        acc[cleanKey] = value;
+      }
+      return acc;
+    }, {});
+
+    summary.name = summary.name || normalized.nome_formula || normalized.nome || normalized.formula;
+    summary.type = summary.type || normalized.tipologia || normalized.tipo;
+    summary.volume = summary.volume || toNumeric(normalized.volume) || toNumeric(normalized.volume_ml);
+    summary.concentration =
+      summary.concentration ||
+      toNumeric(normalized.concentrazione) ||
+      toNumeric(normalized.concentrazione_aromi);
+    summary.density = summary.density || toNumeric(normalized.densita) || toNumeric(normalized.densita_media);
+    summary.notes = summary.notes || normalized.note_creative || normalized.note || normalized.commenti;
+    summary.topNotes = summary.topNotes || normalized.note_di_testa || normalized.testa;
+    summary.heartNotes = summary.heartNotes || normalized.note_di_cuore || normalized.cuore;
+    summary.baseNotes = summary.baseNotes || normalized.note_di_fondo || normalized.fondo;
+    summary.impressions = summary.impressions || normalized.sensazioni || normalized.valutazione;
+
+    const componentName =
+      normalized.essenza ||
+      normalized.materia_prima ||
+      normalized.ingrediente ||
+      normalized.nome_ingrediente ||
+      normalized.nome_materia ||
+      normalized.componente ||
+      normalized.nome;
+    const percentage = toNumeric(normalized.percentuale || normalized.percento || normalized.percent);
+    if (componentName && percentage !== null) {
+      summary.components.push({ name: componentName, percentage });
+    }
+  });
+
+  return summary;
+}
+
+function parseFormulaFromText(text) {
+  if (!text) return null;
+  const sanitized = text.replace(/\s+/g, " ").trim();
+  const summary = {
+    components: [],
+  };
+
+  summary.name = matchGroup(sanitized, /Nome (?:della )?formula[:\-]\s*([^:]+?)(?:Tipologia|Volume|Concentrazione|Note|Famiglia|$)/i);
+  summary.type = matchGroup(sanitized, /Tipologia[:\-]\s*([^:]+?)(?:Volume|Concentrazione|Note|Famiglia|$)/i);
+  summary.volume = toNumeric(matchGroup(sanitized, /Volume(?: batch)?[:\-]\s*([\d.,]+)/i));
+  summary.concentration = toNumeric(matchGroup(sanitized, /Concentrazione(?: aromi)?[:\-]\s*([\d.,]+)/i));
+  summary.notes = matchGroup(sanitized, /Note creative[:\-]\s*([^:]+?)(?:Note di Testa|Note di Cuore|Note di Fondo|Sensazioni|$)/i);
+  summary.topNotes = matchGroup(sanitized, /Note di Testa[:\-]\s*([^:]+?)(?:Note di Cuore|Note di Fondo|Sensazioni|$)/i);
+  summary.heartNotes = matchGroup(sanitized, /Note di Cuore[:\-]\s*([^:]+?)(?:Note di Fondo|Sensazioni|$)/i);
+  summary.baseNotes = matchGroup(sanitized, /Note di Fondo[:\-]\s*([^:]+?)(?:Sensazioni|Famiglia|$)/i);
+  summary.impressions = matchGroup(sanitized, /Sensazioni[:\-]\s*([^:]+?)(?:Famiglia|$)/i);
+
+  const componentRegex = /([A-Za-zÀ-ÖØ-öø-ÿ'’\s]+?)\s*(?:[-–:])\s*([\d.,]+)\s*%/g;
+  let match;
+  while ((match = componentRegex.exec(sanitized))) {
+    const name = match[1].trim();
+    const percentage = toNumeric(match[2]);
+    if (name && percentage !== null) {
+      summary.components.push({ name, percentage });
+    }
+  }
+
+  return summary;
+}
+
+function buildFormulaFromImport(data) {
+  if (!data) return null;
+
+  const fallbackVolume = Number(formFields.volume.value) || 10;
+  const fallbackDensity = Number(formFields.density.value) || 0.96;
+  const fallbackConcentration = Number(formFields.concentration.value) || 18;
+  const fallbackRating = Number(elements.rating.value) || 8;
+
+  const volume = toNumeric(data.volume);
+  const density = toNumeric(data.density);
+  const concentration = toNumeric(data.concentration);
+  const rating = toNumeric(data.rating);
+
+  let name = (data.name || data.formula || "").toString().trim();
+  if (!name) {
+    name = `Import ${new Date().toLocaleString()}`;
+  }
+
+  const formula = {
+    name,
+    type: (data.type || "EDP").toUpperCase(),
+    volume: volume ?? fallbackVolume,
+    density: density ?? fallbackDensity,
+    concentration: concentration ?? fallbackConcentration,
+    notes: data.notes || "",
+    components: [],
+    componentsDetailed: [],
+    rating: rating ?? fallbackRating,
+    pyramid: {
+      top: stringifyNotes(data.topNotes || data.pyramid?.top),
+      heart: stringifyNotes(data.heartNotes || data.pyramid?.heart),
+      base: stringifyNotes(data.baseNotes || data.pyramid?.base),
+    },
+    impressions: stringifyNotes(data.impressions),
+    analysis: null,
+    savedAt: new Date().toISOString(),
+  };
+
+  const missing = [];
+  (data.components || []).forEach((component) => {
+    const essence = findEssenceByName(component.name);
+    const percentage = toNumeric(component.percentage);
+    if (!essence || percentage === null || percentage <= 0) {
+      if (component.name) {
+        missing.push(component.name);
+      }
+      return;
+    }
+    formula.components.push({ id: essence.id, percentage });
+  });
+
+  return { formula, missing };
+}
+
+function findEssenceByName(name) {
+  if (!name) return null;
+  const normalized = normalizeLabel(name);
+  if (!normalized) return null;
+  return essenceNameIndex.get(normalized) || null;
 }
 
 function openSaveReport(formula) {
@@ -1084,6 +1360,65 @@ function normalizeExternalEssence(raw, endpoint, index) {
     harmonies,
     externalSource: endpoint,
   };
+}
+
+function formatNumber(value) {
+  const number = toNumeric(value);
+  if (number === null) return "—";
+  return Number(number).toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+function formatTimestamp(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+function matchGroup(text, regex) {
+  if (!text) return "";
+  const match = regex.exec(text);
+  return match ? match[1].trim() : "";
+}
+
+function stringifyNotes(value) {
+  if (!value) return "";
+  if (Array.isArray(value)) {
+    return value.map((item) => `${item}`.trim()).filter(Boolean).join(", ");
+  }
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  return `${value}`.trim();
+}
+
+function normalizeLabel(value) {
+  if (!value && value !== 0) return "";
+  return value
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, "_");
+}
+
+function toNumeric(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === "string") {
+    const sanitized = value
+      .replace(/[^0-9,.-]/g, "")
+      .replace(/,(?=\d{3}\b)/g, "")
+      .replace(/,/g, ".");
+    if (!sanitized) return null;
+    const number = Number(sanitized);
+    return Number.isFinite(number) ? number : null;
+  }
+  return null;
 }
 
 function toArray(value) {
