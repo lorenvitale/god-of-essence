@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>God of Essence · Formulatore Profumi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <h1>Formulatore di Profumi</h1>
+        <p>
+          Disegna accordi unici con una libreria di essenze pregiate, gestisci i
+          test batch e scopri la piramide olfattiva perfetta.
+        </p>
+        <button id="start-builder" class="btn btn--primary">
+          Crea una nuova formula
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel">
+        <section class="panel__section">
+          <div class="panel__header">
+            <h2>Database Essenze</h2>
+            <input
+              type="search"
+              id="search-essence"
+              placeholder="Cerca nota, famiglia, naturale..."
+              aria-label="Cerca essenza"
+            />
+          </div>
+          <div class="pill-filter" id="family-filter"></div>
+          <ul class="essence-list" id="essence-list" aria-live="polite"></ul>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-live="polite">
+        <div class="workspace__intro" id="workspace-intro">
+          <h2>Inizia dal concept</h2>
+          <p>
+            Scegli le materie prime dalla libreria, imposta il batch di test e
+            definisci la tua piramide olfattiva. Tutto aggiornato in tempo reale
+            con percentuali, ml, grammi e gocce.
+          </p>
+        </div>
+
+        <div class="workspace__content" id="workspace" hidden>
+          <section class="card card--glass" aria-labelledby="batch-heading">
+            <div class="card__header">
+              <h2 id="batch-heading">Impostazioni Batch</h2>
+              <button class="btn btn--ghost" id="load-formula">Carica formula salvata</button>
+            </div>
+            <form class="form-grid" id="batch-form">
+              <label>
+                Nome formula
+                <input type="text" id="formula-name" placeholder="Es. Aurora Notturna" required />
+              </label>
+              <label>
+                Tipologia
+                <select id="batch-type">
+                  <option value="EDP">Eau de Parfum (EDP)</option>
+                  <option value="EDT">Eau de Toilette (EDT)</option>
+                  <option value="PARFUM">Parfum</option>
+                  <option value="COLOGNE">Cologne</option>
+                </select>
+              </label>
+              <label>
+                Volume batch
+                <div class="input-with-unit">
+                  <input type="number" id="batch-volume" min="1" value="10" />
+                  <span>ml</span>
+                </div>
+              </label>
+              <label>
+                Densità media
+                <div class="input-with-unit">
+                  <input type="number" id="density" min="0.5" step="0.01" value="0.96" />
+                  <span>g/ml</span>
+                </div>
+              </label>
+              <label>
+                Concentrazione aromi
+                <div class="input-with-unit">
+                  <input type="number" id="concentration" min="1" max="50" value="18" />
+                  <span>%</span>
+                </div>
+              </label>
+              <label>
+                Note creative
+                <textarea id="formula-notes" rows="1" placeholder="Mood, ispirazioni, contesto" spellcheck="false"></textarea>
+              </label>
+            </form>
+          </section>
+
+          <section class="card card--glass" aria-labelledby="composition-heading">
+            <div class="card__header">
+              <h2 id="composition-heading">Composizione</h2>
+              <div class="card__actions">
+                <button class="btn btn--ghost" id="clear-selection">Svuota</button>
+              </div>
+            </div>
+            <div class="composition" id="composition"></div>
+            <div class="card__footer" id="composition-summary"></div>
+          </section>
+
+          <section class="card card--glass" aria-labelledby="evaluation-heading">
+            <div class="card__header">
+              <h2 id="evaluation-heading">Valutazione &amp; Piramide</h2>
+              <div class="badge" id="olfactory-family">—</div>
+            </div>
+            <form class="evaluation" id="evaluation-form">
+              <label>
+                Voto complessivo
+                <input type="range" id="rating" min="0" max="10" step="0.5" value="8" />
+                <output for="rating" id="rating-output">8</output>
+              </label>
+              <label>
+                Piramide olfattiva
+                <div class="pyramid" id="pyramid">
+                  <div>
+                    <h3>Note di Testa</h3>
+                    <textarea id="top-notes" rows="2" placeholder="Agrumi, Lavanda..."></textarea>
+                  </div>
+                  <div>
+                    <h3>Note di Cuore</h3>
+                    <textarea id="heart-notes" rows="2" placeholder="Gelsomino, Rosa..."></textarea>
+                  </div>
+                  <div>
+                    <h3>Note di Fondo</h3>
+                    <textarea id="base-notes" rows="2" placeholder="Ambra, Patchouli..."></textarea>
+                  </div>
+                </div>
+              </label>
+              <label>
+                Sensazioni
+                <textarea id="impressions" rows="3" placeholder="Proiezione, evoluzione, contesto d'uso"></textarea>
+              </label>
+              <div class="evaluation__actions">
+                <button type="button" class="btn btn--ghost" id="duplicate-formula">Duplica</button>
+                <button type="button" class="btn btn--primary" id="save-formula">Salva formula</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <template id="composition-row-template">
+      <div class="composition__row">
+        <div class="composition__meta">
+          <h3 class="composition__name"></h3>
+          <p class="composition__details"></p>
+        </div>
+        <div class="composition__inputs">
+          <label class="slider">
+            <span>Percentuale</span>
+            <input type="range" min="0" max="100" step="0.5" />
+            <output>0%</output>
+          </label>
+          <div class="composition__metrics">
+            <div>
+              <span class="metric__label">ml</span>
+              <span class="metric__value" data-unit="ml">0</span>
+            </div>
+            <div>
+              <span class="metric__label">g</span>
+              <span class="metric__value" data-unit="g">0</span>
+            </div>
+            <div>
+              <span class="metric__label">gocce</span>
+              <span class="metric__value" data-unit="drops">0</span>
+            </div>
+          </div>
+          <button class="btn-icon" type="button" aria-label="Rimuovi">
+            <span>&times;</span>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <template id="saved-formulas-template">
+      <dialog class="modal" id="saved-formulas-modal">
+        <div class="modal__content">
+          <h2>Formule salvate</h2>
+          <ul id="saved-formulas-list"></ul>
+          <div class="modal__actions">
+            <button class="btn btn--ghost" id="close-saved">Chiudi</button>
+          </div>
+        </div>
+      </dialog>
+    </template>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
