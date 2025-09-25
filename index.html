@@ -40,6 +40,9 @@
             />
           </div>
           <div class="pill-filter" id="family-filter"></div>
+          <div class="panel__status" id="sync-status" aria-live="polite">
+            Libreria locale caricata, sincronizzazione avanzata pronta.
+          </div>
           <ul class="essence-list" id="essence-list" aria-live="polite"></ul>
         </section>
       </aside>
@@ -146,6 +149,7 @@
                 <textarea id="impressions" rows="3" placeholder="Proiezione, evoluzione, contesto d'uso"></textarea>
               </label>
               <div class="evaluation__actions">
+                <button type="button" class="btn btn--ghost" id="restore-ai">Suggerimenti AI</button>
                 <button type="button" class="btn btn--ghost" id="duplicate-formula">Duplica</button>
                 <button type="button" class="btn btn--primary" id="save-formula">Salva formula</button>
               </div>

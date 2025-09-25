@@ -1,3 +1,5 @@
+import LOCAL_ESSENCES from "./data/essences.js";
+
 const DROPS_PER_ML = 20;
 const DEFAULT_PERCENTAGES = {
   top: 8,
@@ -5,384 +7,12 @@ const DEFAULT_PERCENTAGES = {
   base: 15,
 };
 
-const ESSENCES = [
-  {
-    id: "bergamot-calabria",
-    name: "Bergamotto di Calabria",
-    family: "Agrumata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["frizzante", "solare", "tonica"],
-  },
-  {
-    id: "lemon-sicily",
-    name: "Limone di Sicilia",
-    family: "Agrumata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["limpido", "sottile", "verde"],
-  },
-  {
-    id: "grapefruit-pink",
-    name: "Pompelmo Rosa",
-    family: "Agrumata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["amaricante", "effervescente"],
-  },
-  {
-    id: "blackcurrant-bud",
-    name: "Bocciolo di Ribes Nero",
-    family: "Fruttata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["verde", "cremoso", "sulfureo"],
-  },
-  {
-    id: "aldehyde-c12",
-    name: "Aldeide C12 MNA",
-    family: "Aldeidica",
-    noteType: "top",
-    source: "sintetica",
-    descriptors: ["saponosa", "scintillante", "metallica"],
-  },
-  {
-    id: "pink-pepper",
-    name: "Pepe Rosa CO2",
-    family: "Speziata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["pepato", "rosato", "fruttato"],
-  },
-  {
-    id: "cardamom",
-    name: "Cardamomo del Guatemala",
-    family: "Speziata",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["freddo", "eucaliptato", "balsamico"],
-  },
-  {
-    id: "saffron",
-    name: "Zafferano Assoluta",
-    family: "Speziata",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["cuoio", "dorato", "metallico"],
-  },
-  {
-    id: "iris-pallida",
-    name: "Iris Pallida Burro",
-    family: "Floreale",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["cipriato", "vellutato", "legnoso"],
-  },
-  {
-    id: "jasmine-sambac",
-    name: "Gelsomino Sambac",
-    family: "Floreale",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["solare", "miele", "verde"],
-  },
-  {
-    id: "rose-damask",
-    name: "Rosa Damascena Assoluta",
-    family: "Floreale",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["mielata", "profonda", "vellutata"],
-  },
-  {
-    id: "ylang-comores",
-    name: "Ylang Ylang Comore",
-    family: "Floreale",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["cremoso", "fruttato", "solare"],
-  },
-  {
-    id: "violet-leaf",
-    name: "Foglia di Violetta Absolue",
-    family: "Foglia Verde",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["vegetale", "acquatico", "metallico"],
-  },
-  {
-    id: "lavender-highland",
-    name: "Lavanda d'Alta Provenza",
-    family: "Aromatica",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["balsamica", "erbaria", "calmante"],
-  },
-  {
-    id: "roasted-coffee",
-    name: "Caffè Tostato CO2",
-    family: "Gourmand",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["torrefatto", "amaro", "affumicato"],
-  },
-  {
-    id: "tonka",
-    name: "Fava Tonka Assoluta",
-    family: "Gourmand",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["mandorlata", "calda", "tabaccosa"],
-  },
-  {
-    id: "vanillin",
-    name: "Vanillina",
-    family: "Gourmand",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["dolce", "crema", "comfort"],
-  },
-  {
-    id: "ambroxan",
-    name: "Ambroxan",
-    family: "Ambrata",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["ambrato", "minerale", "sensuale"],
-  },
-  {
-    id: "cedar-atlas",
-    name: "Cedro dell'Atlas",
-    family: "Legnosa",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["secco", "resinoso", "maturo"],
-  },
-  {
-    id: "sandalwood",
-    name: "Sandalo Nuovo Caledonia",
-    family: "Legnosa",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["latteo", "cremoso", "morbido"],
-  },
-  {
-    id: "patchouli-fraction",
-    name: "Patchouli Scorched Fraction",
-    family: "Legnosa",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["cioccolato", "terroso", "boisé"],
-  },
-  {
-    id: "vetiver-haïti",
-    name: "Vetiver di Haiti",
-    family: "Terrosa",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["affumicato", "terroso", "legnoso"],
-  },
-  {
-    id: "oakmoss",
-    name: "Muschio di Quercia Low-Atr",
-    family: "Chypré",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["umido", "salino", "boscoso"],
-  },
-  {
-    id: "labdanum-resinoid",
-    name: "Labdano Resinoide",
-    family: "Ambrata",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["cuoio", "ambrato", "resinoso"],
-  },
-  {
-    id: "benzoin-siam",
-    name: "Benzoino del Siam",
-    family: "Balsamica",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["miele", "vaniglia", "balsamico"],
-  },
-  {
-    id: "cashmeran",
-    name: "Cashmeran",
-    family: "Muscata",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["soffice", "boisé", "muschiata"],
-  },
-  {
-    id: "iso-e-super",
-    name: "Iso E Super",
-    family: "Legnosa",
-    noteType: "heart",
-    source: "sintetica",
-    descriptors: ["trasparente", "cedrato", "moderno"],
-  },
-  {
-    id: "hedione",
-    name: "Hedione HC",
-    family: "Floreale",
-    noteType: "heart",
-    source: "sintetica",
-    descriptors: ["gelsominato", "radioso", "arioso"],
-  },
-  {
-    id: "muguet-synth",
-    name: "Hydroxycitronellal",
-    family: "Floreale",
-    noteType: "heart",
-    source: "sintetica",
-    descriptors: ["mughetto", "soffice", "verde"],
-  },
-  {
-    id: "ambrettolide",
-    name: "Ambrettolide",
-    family: "Muscata",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["pulito", "setoso", "muschiato"],
-  },
-  {
-    id: "cetalox",
-    name: "Cetalox",
-    family: "Ambrata",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["ambra grigia", "minerale", "vellutata"],
-  },
-  {
-    id: "galbanum",
-    name: "Galbano Resina",
-    family: "Foglia Verde",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["verde", "amarognolo", "resinoso"],
-  },
-  {
-    id: "mate-absolute",
-    name: "Maté Assoluta",
-    family: "Erbacea",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["tostato", "verde", "affumicato"],
-  },
-  {
-    id: "immortelle",
-    name: "Elicriso Assoluta",
-    family: "Balsamica",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["miele", "curry", "solare"],
-  },
-  {
-    id: "frankincense",
-    name: "Incenso Oman",
-    family: "Resinosa",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["fumosa", "limpida", "sacrale"],
-  },
-  {
-    id: "myrrh",
-    name: "Mirra Eritrea",
-    family: "Resinosa",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["balsamica", "liquirizia", "mistica"],
-  },
-  {
-    id: "birch-tar",
-    name: "Catrame di Betulla",
-    family: "Cuoio",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["affumicato", "cuoio", "animalico"],
-  },
-  {
-    id: "suederal",
-    name: "Suederal",
-    family: "Cuoio",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["scamosciato", "morbido", "ambra"],
-  },
-  {
-    id: "marine-brisa",
-    name: "Accordo Marino Brisa",
-    family: "Acquatica",
-    noteType: "top",
-    source: "sintetica",
-    descriptors: ["ozonica", "salina", "aria"],
-  },
-  {
-    id: "melon-fresh",
-    name: "Melone Fresco Base",
-    family: "Fruttata",
-    noteType: "top",
-    source: "sintetica",
-    descriptors: ["acquatico", "dolce", "trasparente"],
-  },
-  {
-    id: "fig-leaf",
-    name: "Foglia di Fico",
-    family: "Foglia Verde",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["lattea", "verde", "solare"],
-  },
-  {
-    id: "praline-base",
-    name: "Base Praliné",
-    family: "Gourmand",
-    noteType: "heart",
-    source: "sintetica",
-    descriptors: ["caramello", "nocciola", "burrosa"],
-  },
-  {
-    id: "musk-t",
-    name: "Muscone Synthetico",
-    family: "Muscata",
-    noteType: "base",
-    source: "sintetica",
-    descriptors: ["pelle", "pulito", "sensuale"],
-  },
-  {
-    id: "cocoa-absolute",
-    name: "Cacao Assoluta",
-    family: "Gourmand",
-    noteType: "base",
-    source: "naturale",
-    descriptors: ["cioccolato", "denso", "bitter"],
-  },
-  {
-    id: "tobacco-leaf",
-    name: "Tabacco Foglia Assoluta",
-    family: "Tabaccosa",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["mielato", "cuoio", "fumé"],
-  },
-  {
-    id: "sage",
-    name: "Salvia Sclarea",
-    family: "Aromatica",
-    noteType: "heart",
-    source: "naturale",
-    descriptors: ["erbacea", "ambra", "muschio"],
-  },
-  {
-    id: "peppermint",
-    name: "Menta Piperita",
-    family: "Aromatica",
-    noteType: "top",
-    source: "naturale",
-    descriptors: ["fredda", "verde", "mentolata"],
-  },
+let ESSENCES = [...LOCAL_ESSENCES];
+const EXTERNAL_LIBRARY_ENDPOINTS = [
+  "https://raw.githubusercontent.com/perfume-open-datasets/datasets/main/essences.json",
+  "https://raw.githubusercontent.com/katarzynaq/perfume-library/main/library.json",
 ];
+const essenceIndex = new Map();
 
 const elements = {
   essenceList: document.querySelector("#essence-list"),
@@ -394,18 +24,14 @@ const elements = {
   composition: document.querySelector("#composition"),
   compositionSummary: document.querySelector("#composition-summary"),
   clearSelection: document.querySelector("#clear-selection"),
-  batchForm: document.querySelector("#batch-form"),
   rating: document.querySelector("#rating"),
   ratingOutput: document.querySelector("#rating-output"),
   olfactoryFamily: document.querySelector("#olfactory-family"),
   saveFormula: document.querySelector("#save-formula"),
   loadFormula: document.querySelector("#load-formula"),
   duplicateFormula: document.querySelector("#duplicate-formula"),
-};
-
-const state = {
-  selected: new Map(),
-  activeFamilyFilter: "tutte",
+  restoreAI: document.querySelector("#restore-ai"),
+  syncStatus: document.querySelector("#sync-status"),
 };
 
 const templates = {
@@ -426,11 +52,241 @@ const formFields = {
   impressions: document.querySelector("#impressions"),
 };
 
+const state = {
+  selected: new Map(),
+  activeFamilyFilter: "tutte",
+  detailedComponents: [],
+  analysis: null,
+};
+
+const FragranceAI = (() => {
+  const IDEAL_DISTRIBUTION = { top: 28, heart: 44, base: 28 };
+  const SYNERGY_MAP = {
+    Agrumata: ["Floreale", "Aromatica", "Acquatica", "Chypré"],
+    Floreale: ["Agrumata", "Muscata", "Gourmand", "Legnosa"],
+    Aromatica: ["Agrumata", "Fougère", "Chypré", "Legnosa"],
+    Speziata: ["Gourmand", "Orientale", "Cuoio", "Legnosa"],
+    Gourmand: ["Ambrata", "Tabaccosa", "Floreale", "Muscata"],
+    Legnosa: ["Ambrata", "Muscata", "Terrosa", "Gourmand"],
+    Ambrata: ["Legnosa", "Muscata", "Orientale", "Cuoio"],
+    Muscata: ["Floreale", "Gourmand", "Ambrata", "Acquatica"],
+    Tabaccosa: ["Gourmand", "Cuoio", "Ambrata", "Speziata"],
+    Terrosa: ["Legnosa", "Chypré", "Orientale", "Speziata"],
+    Chypré: ["Floreale", "Legnosa", "Aromatica", "Muscata"],
+    Acquatica: ["Agrumata", "Floreale", "Muscata", "Ambrata"],
+    Orientale: ["Ambrata", "Gourmand", "Speziata", "Cuoio"],
+    Animalica: ["Cuoio", "Floreale", "Ambrata"],
+  };
+
+  function analyze(components, settings) {
+    if (!components || components.length === 0) {
+      return null;
+    }
+
+    const totalPercentage = components.reduce((sum, c) => sum + c.percentage, 0) || 1;
+    const groups = { top: [], heart: [], base: [] };
+    const distribution = { top: 0, heart: 0, base: 0 };
+    const familyTotals = new Map();
+    const descriptorSet = new Set();
+    const facetSet = new Set();
+    let naturalLoad = 0;
+    let syntheticLoad = 0;
+    let intensityAccumulator = 0;
+
+    components.forEach((component) => {
+      const tier = normalizeTier(component.noteType);
+      groups[tier].push(component);
+      distribution[tier] += component.percentage;
+      descriptorSetAdd(descriptorSet, component.descriptors);
+      descriptorSetAdd(facetSet, component.facets);
+      if (component.source === "naturale") {
+        naturalLoad += component.percentage;
+      } else {
+        syntheticLoad += component.percentage;
+      }
+      intensityAccumulator += (component.intensity ?? 0.6) * component.percentage;
+      familyTotals.set(
+        component.family,
+        (familyTotals.get(component.family) || 0) + component.percentage,
+      );
+    });
+
+    const distributionShare = {
+      top: Number(((distribution.top / totalPercentage) * 100).toFixed(1)),
+      heart: Number(((distribution.heart / totalPercentage) * 100).toFixed(1)),
+      base: Number(((distribution.base / totalPercentage) * 100).toFixed(1)),
+    };
+
+    const balanceScore = computeBalanceScore(distributionShare, IDEAL_DISTRIBUTION);
+    const varietyScore = computeVarietyScore(familyTotals.size, descriptorSet.size, facetSet.size);
+    const naturalShare = naturalLoad / (naturalLoad + syntheticLoad || 1);
+    const naturalScore = computeNaturalScore(naturalShare);
+    const synergyScore = computeSynergyScore(components, familyTotals);
+
+    const weightedScore = balanceScore * 0.4 + varietyScore * 0.2 + naturalScore * 0.2 + synergyScore * 0.2;
+    const rating = clamp(Number((weightedScore / 10).toFixed(1)), 0, 10);
+
+    const familyInsights = [...familyTotals.entries()]\
+      .sort((a, b) => b[1] - a[1])\
+      .map(([name, amount]) => ({ name, share: Math.round((amount / totalPercentage) * 100) }));
+
+    const mainFamily = familyInsights[0] || null;
+    const pyramid = buildPyramid(groups);
+    const highlights = buildHighlights({
+      distributionShare,
+      naturalShare,
+      familyInsights,
+      intensity: intensityAccumulator / (totalPercentage || 1) / 100,
+      settings,
+    });
+
+    const impressions = buildImpression({
+      mainFamily,
+      distributionShare,
+      naturalShare,
+      descriptorSet,
+      facetSet,
+      intensity: intensityAccumulator / (totalPercentage || 1) / 100,
+    });
+
+    return {
+      rating,
+      score: Math.round(weightedScore),
+      family: mainFamily,
+      distribution: distributionShare,
+      pyramid,
+      naturalShare: Math.round(naturalShare * 100),
+      syntheticShare: Math.round((1 - naturalShare) * 100),
+      highlights,
+      impressions,
+    };
+  }
+
+  function descriptorSetAdd(set, values = []) {
+    values.forEach((value) => {
+      if (value) {
+        set.add(value.toLowerCase());
+      }
+    });
+  }
+
+  function normalizeTier(value = "heart") {
+    if (value === "top" || value === "heart" || value === "base") {
+      return value;
+    }
+    return value.includes("base") ? "base" : value.includes("top") ? "top" : "heart";
+  }
+
+  function computeBalanceScore(current, ideal) {
+    const delta =
+      Math.abs(current.top - ideal.top) +
+      Math.abs(current.heart - ideal.heart) +
+      Math.abs(current.base - ideal.base);
+    return clamp(100 - delta * 0.9, 0, 100);
+  }
+
+  function computeVarietyScore(familyCount, descriptorCount, facetCount) {
+    const familyScore = Math.min(100, familyCount * 16);
+    const nuanceScore = Math.min(70, descriptorCount * 2.2 + facetCount * 2.8);
+    return clamp(familyScore * 0.6 + nuanceScore * 0.4, 0, 100);
+  }
+
+  function computeNaturalScore(naturalShare) {
+    const preferred = 0.6;
+    const diff = Math.abs(naturalShare - preferred);
+    return clamp(100 - diff * 180, 40, 100);
+  }
+
+  function computeSynergyScore(components, familyTotals) {
+    const pairs = new Set();
+    components.forEach((component) => {
+      const expected = SYNERGY_MAP[component.family] || [];
+      components.forEach((other) => {
+        if (component === other) return;
+        if (expected.includes(other.family)) {
+          const key = [component.family, other.family].sort().join("::");
+          pairs.add(key);
+        }
+      });
+    });
+    const baseScore = Math.min(100, (pairs.size / Math.max(1, familyTotals.size)) * 120);
+    return clamp(baseScore, 30, 100);
+  }
+
+  function buildPyramid(groups) {
+    return {
+      top: groups.top
+        .sort((a, b) => b.percentage - a.percentage)
+        .map((c) => c.name)
+        .slice(0, 4),
+      heart: groups.heart
+        .sort((a, b) => b.percentage - a.percentage)
+        .map((c) => c.name)
+        .slice(0, 4),
+      base: groups.base
+        .sort((a, b) => b.percentage - a.percentage)
+        .map((c) => c.name)
+        .slice(0, 4),
+    };
+  }
+
+  function buildHighlights({ distributionShare, naturalShare, familyInsights, intensity }) {
+    const highlights = [];
+    const balanceSpread = Math.max(distributionShare.top, distributionShare.heart, distributionShare.base) -
+      Math.min(distributionShare.top, distributionShare.heart, distributionShare.base);
+    if (balanceSpread < 18) {
+      highlights.push("Equilibrio ottimale tra le tre altezze olfattive");
+    } else if (distributionShare.base > 36) {
+      highlights.push("Base corposa per scie avvolgenti");
+    }
+
+    if (familyInsights.length > 1) {
+      const [first, second] = familyInsights;
+      highlights.push(`Dialogo ${first.name.toLowerCase()} con accenti ${second.name.toLowerCase()}`);
+    }
+
+    if (naturalShare > 0.7) {
+      highlights.push("Impronta molto naturale");
+    } else if (naturalShare < 0.4) {
+      highlights.push("Profilo futuristico a prevalenza sintetica");
+    }
+
+    if (intensity > 0.0065) {
+      highlights.push("Intensità proiettiva pronunciata");
+    }
+
+    return highlights;
+  }
+
+  function buildImpression({ mainFamily, distributionShare, naturalShare, descriptorSet, facetSet, intensity }) {
+    const familyLabel = mainFamily?.name?.toLowerCase() ?? "sfaccettata";
+    const projection = intensity > 0.0065 ? "avvolgente" : intensity > 0.004 ? "radiosa" : "intima";
+    const longevity = distributionShare.base > 30 ? "persistenza prolungata" : "evoluzione leggera";
+    const accents = [...facetSet].slice(0, 3).join(", ") || [...descriptorSet].slice(0, 3).join(", ");
+    const naturalTone = naturalShare > 0.65 ? "materie prime naturali in evidenza" : naturalShare < 0.35 ? "impronta contemporanea" : "bilanciamento naturale/sintetico";
+
+    return `Scia ${projection} con ${longevity}; cuore ${familyLabel} arricchito da ${accents || "sfumature vellutate"} e ${naturalTone}.`;
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  return { analyze };
+})();
+
+init();
+
 function init() {
-  renderEssenceList();
+  rebuildEssenceIndex();
   renderFamilyPills();
+  renderEssenceList();
   bindEvents();
+  setupManualOverrideTracking();
+  elements.ratingOutput.textContent = formatSliderValue(elements.rating.value);
   loadInitialState();
+  updateSyncStatus("Database locale caricato", "success");
+  syncExternalLibraries();
 }
 
 function bindEvents() {
@@ -438,50 +294,93 @@ function bindEvents() {
   elements.startBuilder.addEventListener("click", startFormula);
   elements.clearSelection.addEventListener("click", clearComposition);
   elements.rating.addEventListener("input", () => {
-    elements.ratingOutput.textContent = elements.rating.value;
+    markManual(elements.rating);
+    elements.ratingOutput.textContent = formatSliderValue(elements.rating.value);
+    persistLastFormula();
   });
   elements.saveFormula.addEventListener("click", handleSaveFormula);
   elements.loadFormula.addEventListener("click", openSavedModal);
   elements.duplicateFormula.addEventListener("click", duplicateFormula);
-  formFields.volume.addEventListener("input", updateCompositionSummary);
-  formFields.density.addEventListener("input", updateCompositionSummary);
-  formFields.concentration.addEventListener("input", updateCompositionSummary);
+  elements.restoreAI.addEventListener("click", resetAIOverrides);
+
+  [formFields.volume, formFields.density, formFields.concentration].forEach((field) => {
+    field.addEventListener("input", () => {
+      if (state.selected.size > 0) {
+        updateCompositionSummary();
+      }
+    });
+  });
+
+  formFields.type.addEventListener("change", persistLastFormula);
+  formFields.name.addEventListener("input", persistLastFormula);
+  formFields.notes.addEventListener("input", persistLastFormula);
 }
 
-function loadInitialState() {
-  const stored = localStorage.getItem("god-of-essence:last");
-  if (!stored) return;
-  const parsed = JSON.parse(stored);
-  populateFormula(parsed);
-  revealWorkspace();
+function setupManualOverrideTracking() {
+  [formFields.topNotes, formFields.heartNotes, formFields.baseNotes, formFields.impressions].forEach((field) => {
+    field.addEventListener("input", () => {
+      markManual(field);
+      persistLastFormula();
+    });
+  });
 }
 
-function startFormula() {
-  revealWorkspace();
-  if (!formFields.name.value) {
-    formFields.name.focus();
+function markManual(field) {
+  field.dataset.manual = "true";
+}
+
+function clearManual(field) {
+  delete field.dataset.manual;
+}
+
+function resetAIOverrides() {
+  [elements.rating, formFields.topNotes, formFields.heartNotes, formFields.baseNotes, formFields.impressions].forEach((field) => {
+    clearManual(field);
+  });
+  if (state.analysis) {
+    applyAnalysis(state.analysis);
+    showToast("Suggerimenti AI ripristinati");
+  } else {
+    applyAnalysis(null);
   }
 }
 
-function revealWorkspace() {
-  elements.workspaceIntro.setAttribute("hidden", "");
-  elements.workspace.removeAttribute("hidden");
-  elements.workspace.scrollIntoView({ behavior: "smooth", block: "start" });
+function rebuildEssenceIndex() {
+  essenceIndex.clear();
+  ESSENCES.forEach((essence) => {
+    essenceIndex.set(essence.id, essence);
+  });
 }
 
 function renderEssenceList() {
   const term = elements.searchInput.value?.toLowerCase().trim() ?? "";
   const filtered = ESSENCES.filter((essence) => {
-    const matchesTerm = [essence.name, essence.family, essence.noteType, essence.source]
+    const haystack = [
+      essence.name,
+      essence.family,
+      essence.noteType,
+      essence.source,
+      ...(essence.descriptors || []),
+      ...(essence.facets || []),
+    ]
       .join(" ")
-      .toLowerCase()
-      .includes(term);
+      .toLowerCase();
+    const matchesTerm = term.length === 0 || haystack.includes(term);
     const matchesFamily =
       state.activeFamilyFilter === "tutte" || essence.family === state.activeFamilyFilter;
     return matchesTerm && matchesFamily;
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   elements.essenceList.innerHTML = "";
+
+  if (filtered.length === 0) {
+    const li = document.createElement("li");
+    li.className = "essence essence--empty";
+    li.textContent = "Nessuna essenza trovata con i filtri attuali";
+    elements.essenceList.appendChild(li);
+    return;
+  }
+
   filtered.forEach((essence) => {
     const li = document.createElement("li");
     li.className = "essence";
@@ -494,17 +393,27 @@ function renderEssenceList() {
       <div class="essence__meta">
         <span>${essence.family}</span>
         <span>${essence.source}</span>
-        <span>${essence.descriptors.join(" · ")}</span>
+        <span>${formatDescriptors(essence)}</span>
       </div>
     `;
 
-    li.addEventListener("click", () => addEssenceToComposition(essence));
+    li.addEventListener("click", () => {
+      addEssenceToComposition(essence);
+    });
     elements.essenceList.appendChild(li);
   });
 }
 
+function formatDescriptors(essence) {
+  const primary = essence.facets?.length ? essence.facets : essence.descriptors;
+  return primary?.slice(0, 3).join(" · ") ?? "";
+}
+
 function renderFamilyPills() {
-  const families = ["tutte", ...new Set(ESSENCES.map((essence) => essence.family))];
+  const uniqueFamilies = [...new Set(ESSENCES.map((essence) => essence.family))].sort((a, b) =>
+    a.localeCompare(b, "it")
+  );
+  const families = ["tutte", ...uniqueFamilies];
   elements.familyFilter.innerHTML = "";
   families.forEach((family) => {
     const button = document.createElement("button");
@@ -520,6 +429,31 @@ function renderFamilyPills() {
     });
     elements.familyFilter.appendChild(button);
   });
+}
+
+function loadInitialState() {
+  const stored = localStorage.getItem("god-of-essence:last");
+  if (!stored) return;
+  try {
+    const parsed = JSON.parse(stored);
+    populateFormula(parsed);
+    revealWorkspace();
+  } catch (error) {
+    console.error("Impossibile caricare la formula salvata", error);
+  }
+}
+
+function startFormula() {
+  revealWorkspace();
+  if (!formFields.name.value) {
+    formFields.name.focus();
+  }
+}
+
+function revealWorkspace() {
+  elements.workspaceIntro.setAttribute("hidden", "");
+  elements.workspace.removeAttribute("hidden");
+  elements.workspace.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function addEssenceToComposition(essence) {
@@ -567,36 +501,60 @@ function highlightExistingRow(id) {
 
 function clearComposition() {
   state.selected.clear();
+  state.detailedComponents = [];
+  state.analysis = null;
   elements.composition.innerHTML = "";
-  updateCompositionSummary();
+  elements.compositionSummary.textContent = "Aggiungi materie prime per iniziare.";
+  applyAnalysis(null);
+  persistLastFormula();
 }
 
 function updateCompositionSummary() {
-  const compositionRows = [...elements.composition.querySelectorAll(".composition__row")];
-  const percentages = compositionRows.map((row) => {
-    const slider = row.querySelector("input[type='range']");
-    return Number(slider.value);
-  });
-  const totalPercentage = percentages.reduce((sum, value) => sum + value, 0);
+  const rows = [...elements.composition.querySelectorAll(".composition__row")];
+  if (rows.length === 0) {
+    clearComposition();
+    return;
+  }
 
   const volume = Number(formFields.volume.value) || 0;
   const concentration = Number(formFields.concentration.value) || 0;
   const density = Number(formFields.density.value) || 1;
-
   const aromaticVolume = (volume * concentration) / 100;
 
-  compositionRows.forEach((row) => {
+  const detailedComponents = rows.map((row) => {
+    const id = row.dataset.id;
     const slider = row.querySelector("input[type='range']");
     const percentage = Number(slider.value);
     const ml = (aromaticVolume * percentage) / 100;
     const grams = ml * density;
     const drops = ml * DROPS_PER_ML;
+    const essence = essenceIndex.get(id) ?? { id, name: id, family: "—", noteType: "heart", source: "—" };
 
     row.querySelector('[data-unit="ml"]').textContent = ml.toFixed(2);
     row.querySelector('[data-unit="g"]').textContent = grams.toFixed(2);
     row.querySelector('[data-unit="drops"]').textContent = Math.round(drops);
+
+    return {
+      id,
+      name: essence.name,
+      family: essence.family,
+      noteType: essence.noteType,
+      source: essence.source,
+      descriptors: essence.descriptors ?? [],
+      facets: essence.facets ?? [],
+      volatility: essence.volatility ?? 0.5,
+      intensity: essence.intensity ?? 0.6,
+      harmonies: essence.harmonies ?? [],
+      percentage,
+      ml: Number(ml.toFixed(3)),
+      grams: Number(grams.toFixed(3)),
+      drops: Math.round(drops),
+    };
   });
 
+  state.detailedComponents = detailedComponents;
+
+  const totalPercentage = detailedComponents.reduce((sum, component) => sum + component.percentage, 0);
   const remainder = Math.max(0, 100 - totalPercentage);
   const summaryParts = [
     `<span>${totalPercentage.toFixed(1)}% aroma</span>`,
@@ -604,26 +562,49 @@ function updateCompositionSummary() {
     `${aromaticVolume.toFixed(2)} ml aroma totale`,
   ];
   elements.compositionSummary.innerHTML = summaryParts.join(" · ");
-  updateOlfactoryFamily();
+
+  state.analysis = FragranceAI.analyze(detailedComponents, { volume, concentration, density });
+  applyAnalysis(state.analysis);
   persistLastFormula();
 }
 
-function updateOlfactoryFamily() {
-  if (state.selected.size === 0) {
+function applyAnalysis(analysis) {
+  if (!analysis) {
     elements.olfactoryFamily.textContent = "—";
+    if (!elements.rating.dataset.manual) {
+      elements.rating.value = 8;
+      elements.ratingOutput.textContent = formatSliderValue(elements.rating.value);
+    }
+    if (!formFields.topNotes.dataset.manual) formFields.topNotes.value = "";
+    if (!formFields.heartNotes.dataset.manual) formFields.heartNotes.value = "";
+    if (!formFields.baseNotes.dataset.manual) formFields.baseNotes.value = "";
+    if (!formFields.impressions.dataset.manual) formFields.impressions.value = "";
     return;
   }
-  const totals = {};
-  state.selected.forEach((percentage, id) => {
-    const essence = ESSENCES.find((item) => item.id === id);
-    if (!essence) return;
-    totals[essence.family] = (totals[essence.family] || 0) + percentage;
-  });
-  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  const [topFamily, topValue] = sorted[0];
-  const total = [...state.selected.values()].reduce((sum, value) => sum + value, 0);
-  const percentage = total > 0 ? Math.round((topValue / total) * 100) : 0;
-  elements.olfactoryFamily.textContent = `${topFamily} · ${percentage}%`;
+
+  if (analysis.family) {
+    elements.olfactoryFamily.textContent = `${analysis.family.name} · ${analysis.family.share}%`;
+  } else {
+    elements.olfactoryFamily.textContent = "—";
+  }
+
+  if (!elements.rating.dataset.manual) {
+    elements.rating.value = analysis.rating;
+    elements.ratingOutput.textContent = formatSliderValue(analysis.rating);
+  }
+
+  if (!formFields.topNotes.dataset.manual) {
+    formFields.topNotes.value = analysis.pyramid.top.join(", ");
+  }
+  if (!formFields.heartNotes.dataset.manual) {
+    formFields.heartNotes.value = analysis.pyramid.heart.join(", ");
+  }
+  if (!formFields.baseNotes.dataset.manual) {
+    formFields.baseNotes.value = analysis.pyramid.base.join(", ");
+  }
+  if (!formFields.impressions.dataset.manual) {
+    formFields.impressions.value = analysis.impressions;
+  }
 }
 
 function gatherFormulaState() {
@@ -633,6 +614,20 @@ function gatherFormulaState() {
     return { id, percentage: Number(slider.value) };
   });
 
+  const analysis = state.analysis
+    ? {
+        rating: state.analysis.rating,
+        score: state.analysis.score,
+        family: state.analysis.family,
+        distribution: state.analysis.distribution,
+        highlights: state.analysis.highlights,
+        impressions: state.analysis.impressions,
+        pyramid: state.analysis.pyramid,
+        naturalShare: state.analysis.naturalShare,
+        syntheticShare: state.analysis.syntheticShare,
+      }
+    : null;
+
   return {
     name: formFields.name.value || "Formula senza nome",
     type: formFields.type.value,
@@ -641,6 +636,7 @@ function gatherFormulaState() {
     concentration: Number(formFields.concentration.value) || 0,
     notes: formFields.notes.value,
     components,
+    componentsDetailed: state.detailedComponents,
     rating: Number(elements.rating.value),
     pyramid: {
       top: formFields.topNotes.value,
@@ -648,6 +644,7 @@ function gatherFormulaState() {
       base: formFields.baseNotes.value,
     },
     impressions: formFields.impressions.value,
+    analysis,
     savedAt: new Date().toISOString(),
   };
 }
@@ -661,17 +658,21 @@ function populateFormula(data) {
   formFields.concentration.value = data.concentration ?? 18;
   formFields.notes.value = data.notes ?? "";
   elements.rating.value = data.rating ?? 8;
-  elements.ratingOutput.textContent = elements.rating.value;
+  elements.ratingOutput.textContent = formatSliderValue(elements.rating.value);
   formFields.topNotes.value = data.pyramid?.top ?? "";
   formFields.heartNotes.value = data.pyramid?.heart ?? "";
   formFields.baseNotes.value = data.pyramid?.base ?? "";
   formFields.impressions.value = data.impressions ?? "";
 
+  [elements.rating, formFields.topNotes, formFields.heartNotes, formFields.baseNotes, formFields.impressions].forEach(
+    (field) => markManual(field),
+  );
+
   data.components?.forEach((component) => {
-    const essence = ESSENCES.find((item) => item.id === component.id);
+    const essence = essenceIndex.get(component.id);
     if (essence) {
       addEssenceToComposition(essence);
-      const row = elements.composition.querySelector(`.composition__row[data-id='${essence.id}']`);
+      const row = elements.composition.querySelector(`.composition__row[data-id='${component.id}']`);
       if (row) {
         const slider = row.querySelector("input[type='range']");
         slider.value = component.percentage;
@@ -679,21 +680,28 @@ function populateFormula(data) {
       }
     }
   });
-  updateCompositionSummary();
+
+  state.analysis = data.analysis ?? null;
+  if (state.analysis) {
+    applyAnalysis(state.analysis);
+  } else {
+    updateCompositionSummary();
+  }
 }
 
 function handleSaveFormula() {
   const formula = gatherFormulaState();
   const stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
-  const existingIndex = stored.findIndex((item) => item.name === formula.name);
-  if (existingIndex >= 0) {
-    stored[existingIndex] = formula;
+  const index = stored.findIndex((item) => item.name === formula.name);
+  if (index >= 0) {
+    stored[index] = formula;
   } else {
     stored.push(formula);
   }
   localStorage.setItem("god-of-essence:formulas", JSON.stringify(stored));
   localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
   showToast(`Formula "${formula.name}" salvata`);
+  openSaveReport(formula);
 }
 
 function persistLastFormula() {
@@ -724,12 +732,12 @@ function openSavedModal() {
     .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt))
     .forEach((formula, index) => {
       const li = document.createElement("li");
+      const rating = formula.analysis?.rating ?? formula.rating ?? "—";
       li.innerHTML = `
         <div>
           <strong>${formula.name}</strong>
-          <div class="meta">${formula.type} · ${formula.volume} ml · ${new Date(
-        formula.savedAt
-      ).toLocaleString()}</div>
+          <div class="meta">${formula.type} · ${formula.volume} ml · ⭐ ${rating}</div>
+          <div class="meta">${new Date(formula.savedAt).toLocaleString()}</div>
         </div>
         <div class="modal-buttons">
           <button class="btn btn--ghost" data-action="load" data-index="${index}">Carica</button>
@@ -767,6 +775,334 @@ function duplicateFormula() {
   showToast("Formula duplicata, personalizza liberamente");
 }
 
+function openSaveReport(formula) {
+  const detailed = formula.componentsDetailed?.length ? formula.componentsDetailed : state.detailedComponents;
+  const analysis = formula.analysis ?? state.analysis;
+  const reportWindow = window.open("", "_blank", "noopener");
+  if (!reportWindow) {
+    showToast("Abilita i popup per esportare la formula");
+    return;
+  }
+
+  const safeData = (data) => JSON.stringify(data).replace(/</g, "\\u003C");
+
+  const rows = detailed
+    .map(
+      (component, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${component.name}</td>
+          <td>${component.family}</td>
+          <td>${component.noteType}</td>
+          <td>${component.percentage.toFixed(2)}%</td>
+          <td>${component.ml.toFixed(2)}</td>
+          <td>${component.grams.toFixed(2)}</td>
+          <td>${component.drops}</td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  const analysisBlock = analysis
+    ? `
+        <p class="report__metric">Voto AI: <strong>${analysis.rating}</strong> · Score ${analysis.score}/100</p>
+        <p class="report__metric">Famiglia dominante: <strong>${analysis.family?.name ?? "—"}</strong></p>
+        <p class="report__metric">Distribuzione: Testa ${analysis.distribution.top}% · Cuore ${analysis.distribution.heart}% · Fondo ${analysis.distribution.base}%</p>
+        <p class="report__metric">Naturale vs sintetico: ${analysis.naturalShare}% / ${analysis.syntheticShare}%</p>
+        <p class="report__metric">Highlight: ${analysis.highlights.join(" · ") || "—"}</p>
+        <p class="report__metric">Sensazioni: ${analysis.impressions}</p>
+      `
+    : "";
+
+  reportWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="it">
+      <head>
+        <meta charset="utf-8" />
+        <title>Report Formula · ${formula.name}</title>
+        <style>
+          * { box-sizing: border-box; font-family: 'Manrope', system-ui, sans-serif; }
+          body { margin: 0; background: #0b0e15; color: #f3f4f6; padding: 2.5rem; }
+          h1 { font-size: 2.2rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+          h2 { text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2rem; font-size: 1.2rem; }
+          .report { max-width: 960px; margin: 0 auto; background: rgba(15,18,24,0.85); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 2.5rem; position: relative; overflow: hidden; }
+          .report::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 20% 20%, rgba(242,183,5,0.22), transparent 55%), radial-gradient(circle at 80% 10%, rgba(116,89,255,0.18), transparent 45%); pointer-events: none; }
+          .report__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; position: relative; z-index: 1; }
+          .report__meta { color: #cdd1d9; letter-spacing: 0.08em; font-size: 0.85rem; text-transform: uppercase; }
+          table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: rgba(0,0,0,0.25); backdrop-filter: blur(12px); }
+          th, td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+          th { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; color: #f5d16d; }
+          td { font-size: 0.9rem; }
+          .report__bottle { position: relative; width: 160px; height: 200px; margin-left: auto; }
+          .bottle { position: absolute; inset: 0; border-radius: 30px 30px 18px 18px; background: linear-gradient(145deg, rgba(255,215,128,0.15), rgba(255,215,128,0.05)); border: 2px solid rgba(255,215,128,0.35); box-shadow: 0 0 45px rgba(255,215,128,0.2); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+          .bottle::after { content: ""; width: 70%; height: 12px; border-radius: 12px; background: rgba(255,232,189,0.4); position: absolute; top: 18px; left: 50%; transform: translateX(-50%); }
+          .bottle__liquid { width: 100%; height: 60%; background: linear-gradient(180deg, rgba(242,183,5,0.75), rgba(255,112,67,0.55)); animation: pulse 3.6s ease-in-out infinite; }
+          .bottle__glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 20%, rgba(255,239,195,0.6), transparent 55%); mix-blend-mode: screen; animation: shimmer 4.2s linear infinite; }
+          .export-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 2rem; }
+          .export-actions button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #f3f4f6; padding: 0.7rem 1.1rem; border-radius: 12px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8rem; transition: all 0.2s ease; }
+          .export-actions button:hover { border-color: rgba(242,183,5,0.6); color: #ffde8f; box-shadow: 0 8px 24px rgba(242,183,5,0.15); }
+          .report__metric { margin: 0.4rem 0; color: #d4d8df; font-size: 0.95rem; }
+          @keyframes pulse { from { height: 55%; } 50% { height: 65%; } to { height: 55%; } }
+          @keyframes shimmer { from { transform: translateY(-15%); opacity: 0.6; } 50% { opacity: 0.9; } to { transform: translateY(10%); opacity: 0.6; } }
+          @media print { body { background: #fff; color: #111; padding: 1.5rem; } .report { box-shadow: none; border: none; background: #fff; } .report::before, .report__bottle, .export-actions { display: none !important; } th, td { border-color: #ddd; color: #111; } }
+        </style>
+      </head>
+      <body>
+        <div class="report">
+          <div class="report__header">
+            <div>
+              <h1>${formula.name}</h1>
+              <div class="report__meta">${formula.type} · ${formula.volume} ml · ${new Date(
+                formula.savedAt,
+              ).toLocaleString()}</div>
+              ${analysisBlock}
+            </div>
+            <div class="report__bottle">
+              <div class="bottle">
+                <div class="bottle__glow"></div>
+                <div class="bottle__liquid"></div>
+              </div>
+            </div>
+          </div>
+          <h2>Composizione</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Materia prima</th>
+                <th>Famiglia</th>
+                <th>Nota</th>
+                <th>%</th>
+                <th>ml</th>
+                <th>g</th>
+                <th>Gocce</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <div class="export-actions">
+            <button data-export="pdf">Salva PDF</button>
+            <button data-export="excel">Esporta Excel</button>
+            <button data-export="word">Esporta Word</button>
+            <button data-export="jpeg">Scarica JPEG</button>
+          </div>
+        </div>
+        <script>
+          const formula = ${safeData(formula)};
+          const detailed = ${safeData(detailed)};
+          const analysis = ${safeData(analysis || null)};
+
+          function triggerDownload(data, mime, filename) {
+            const blob = new Blob([data], { type: mime });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+          }
+
+          function exportCSV() {
+            const header = ['Nome','Famiglia','Nota','Percentuale','ml','g','Gocce'];
+            const lines = detailed.map((row) => [row.name, row.family, row.noteType, row.percentage, row.ml, row.grams, row.drops].join(';'));
+            const csv = [header.join(';'), ...lines].join('\n');
+            triggerDownload(csv, 'text/csv', `${sanitize(formula.name)}.csv`);
+          }
+
+          function exportWord() {
+            const rows = detailed.map((row) => `<tr><td>${row.name}</td><td>${row.family}</td><td>${row.noteType}</td><td>${row.percentage}%</td><td>${row.ml}</td><td>${row.grams}</td><td>${row.drops}</td></tr>`).join('');
+            const html = `<!DOCTYPE html><html><body><h1>${formula.name}</h1><table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>Materia</th><th>Famiglia</th><th>Nota</th><th>%</th><th>ml</th><th>g</th><th>Gocce</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+            triggerDownload(html, 'application/msword', `${sanitize(formula.name)}.doc`);
+          }
+
+          function exportJPEG() {
+            const canvas = document.createElement('canvas');
+            const width = 1080;
+            const height = 1350;
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#0b0e15');
+            gradient.addColorStop(1, '#1a2233');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#f2b705';
+            ctx.font = '48px Cinzel, serif';
+            ctx.fillText(formula.name, 60, 120);
+            ctx.font = '22px Manrope, sans-serif';
+            ctx.fillStyle = '#d1d5db';
+            ctx.fillText(`${formula.type} · ${formula.volume} ml`, 60, 170);
+            if (analysis) {
+              ctx.fillText(`Voto AI: ${analysis.rating} / Score ${analysis.score}`, 60, 210);
+              ctx.fillText(`Famiglia: ${analysis.family ? analysis.family.name : '—'}`, 60, 250);
+            }
+            ctx.fillText('Composizione', 60, 320);
+            const startY = 360;
+            const lineHeight = 36;
+            detailed.slice(0, 20).forEach((row, index) => {
+              const y = startY + index * lineHeight;
+              ctx.fillStyle = '#f9fafb';
+              ctx.fillText(`${index + 1}. ${row.name}`, 60, y);
+              ctx.fillStyle = '#9ca3af';
+              ctx.fillText(`${row.family} · ${row.noteType} · ${row.percentage.toFixed(1)}%`, 540, y);
+            });
+            const url = canvas.toDataURL('image/jpeg', 0.9);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${sanitize(formula.name)}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+
+          function sanitize(text) {
+            return text.replace(/[^a-z0-9]+/gi, '-').replace(/-+/g, '-').toLowerCase();
+          }
+
+          document.querySelectorAll('[data-export]').forEach((button) => {
+            button.addEventListener('click', () => {
+              const type = button.dataset.export;
+              if (type === 'pdf') {
+                window.print();
+              } else if (type === 'excel') {
+                exportCSV();
+              } else if (type === 'word') {
+                exportWord();
+              } else if (type === 'jpeg') {
+                exportJPEG();
+              }
+            });
+          });
+        </script>
+      </body>
+    </html>
+  `);
+  reportWindow.document.close();
+}
+
+function formatSliderValue(value) {
+  return Number(value).toFixed(1).replace(/\.0$/, "");
+}
+
+function syncExternalLibraries() {
+  if (!EXTERNAL_LIBRARY_ENDPOINTS.length) return;
+  updateSyncStatus("Sincronizzazione con archivi professionali…", "loading");
+
+  Promise.allSettled(
+    EXTERNAL_LIBRARY_ENDPOINTS.map((endpoint) =>
+      fetch(endpoint)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Status ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((payload) => ({ endpoint, payload }))
+    ),
+  )
+    .then((results) => {
+      const additions = [];
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          const { endpoint, payload } = result.value;
+          const extracted = extractExternalEssences(payload, endpoint);
+          extracted.forEach((essence) => {
+            if (!essenceIndex.has(essence.id)) {
+              additions.push(essence);
+            }
+          });
+        }
+      });
+
+      if (additions.length === 0) {
+        updateSyncStatus("Database locale allineato", "success");
+        return;
+      }
+
+      ESSENCES = [...ESSENCES, ...additions].sort((a, b) => a.name.localeCompare(b.name));
+      rebuildEssenceIndex();
+      renderFamilyPills();
+      renderEssenceList();
+      updateSyncStatus(`Sincronizzate ${additions.length} essenze esterne`, "success");
+    })
+    .catch(() => {
+      updateSyncStatus("Connessione ai cataloghi esterni non disponibile", "offline");
+    });
+}
+
+function extractExternalEssences(payload, endpoint) {
+  if (!payload) return [];
+  const list = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.essences)
+    ? payload.essences
+    : Array.isArray(payload?.data)
+    ? payload.data
+    : [];
+
+  return list
+    .map((item, index) => normalizeExternalEssence(item, endpoint, index))
+    .filter(Boolean);
+}
+
+function normalizeExternalEssence(raw, endpoint, index) {
+  const name = raw.name || raw.nome || raw.material || raw.title;
+  if (!name) return null;
+
+  const family = raw.family || raw.category || raw.famiglia || "Miscela";
+  const noteType = (raw.tier || raw.noteType || raw.layer || "heart").toLowerCase();
+  const sourceRaw = (raw.origin || raw.source || "").toLowerCase();
+  const source = sourceRaw.includes("syn") ? "sintetica" : sourceRaw.includes("nat") ? "naturale" : "naturale";
+  const descriptors = toArray(raw.descriptors || raw.facets || raw.tags || []);
+  const facets = toArray(raw.facets || raw.nuances || []);
+  const volatility = Number(raw.volatility ?? raw.evaporation ?? 0.5) || 0.5;
+  const intensity = Number(raw.intensity ?? raw.strength ?? 0.6) || 0.6;
+  const harmonies = toArray(raw.harmonies || raw.pairings || []);
+  const safeId = `${name}-${family}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 60);
+
+  const id = essenceIndex.has(safeId) ? `${safeId}-${index}` : safeId;
+
+  return {
+    id,
+    name,
+    family,
+    noteType,
+    source,
+    descriptors,
+    facets,
+    volatility,
+    intensity,
+    harmonies,
+    externalSource: endpoint,
+  };
+}
+
+function toArray(value) {
+  if (Array.isArray(value)) return value.map((item) => `${item}`.trim()).filter(Boolean);
+  if (typeof value === "string") {
+    return value
+      .split(/[,;\u2022]/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function updateSyncStatus(message, status = "idle") {
+  if (!elements.syncStatus) return;
+  elements.syncStatus.textContent = message;
+  elements.syncStatus.dataset.status = status;
+}
+
 function showToast(message) {
   const toast = document.createElement("div");
   toast.className = "toast";
@@ -778,5 +1114,3 @@ function showToast(message) {
     setTimeout(() => toast.remove(), 400);
   }, 2600);
 }
-
-init();

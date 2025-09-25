@@ -132,6 +132,64 @@ a {
   flex-wrap: wrap;
 }
 
+.panel__status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel__status::before {
+  content: "\2728";
+  font-size: 0.9rem;
+  color: var(--accent-strong);
+}
+
+.panel__status[data-status="loading"] {
+  border-color: rgba(242, 183, 5, 0.45);
+  color: var(--accent-strong);
+  animation: statusPulse 1.2s ease-in-out infinite alternate;
+}
+
+.panel__status[data-status="loading"]::before {
+  content: "\1F504";
+}
+
+.panel__status[data-status="success"] {
+  border-color: rgba(117, 255, 201, 0.45);
+  color: #9efcd4;
+}
+
+.panel__status[data-status="success"]::before {
+  content: "\2728";
+}
+
+.panel__status[data-status="offline"] {
+  border-color: rgba(255, 107, 107, 0.35);
+  color: #ffb8b8;
+}
+
+.panel__status[data-status="offline"]::before {
+  content: "\26A0";
+}
+
+@keyframes statusPulse {
+  from {
+    box-shadow: 0 0 0 rgba(242, 183, 5, 0.2);
+  }
+  to {
+    box-shadow: 0 0 25px rgba(242, 183, 5, 0.3);
+  }
+}
+
 .pill-filter button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid transparent;
@@ -154,6 +212,17 @@ a {
   list-style: none;
   display: grid;
   gap: 0.75rem;
+}
+
+.essence--empty {
+  padding: 1.2rem;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .essence {
@@ -275,6 +344,16 @@ textarea {
   color: var(--text);
   font: inherit;
   transition: border var(--transition);
+}
+
+select {
+  color: var(--text);
+  background-image: linear-gradient(180deg, rgba(12, 14, 20, 0.85), rgba(12, 14, 20, 0.7));
+}
+
+select option {
+  background: rgba(6, 8, 12, 0.95);
+  color: var(--text);
 }
 
 textarea {
@@ -477,7 +556,8 @@ input[type="range"]::-moz-range-thumb {
 .evaluation__actions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .pyramid {
