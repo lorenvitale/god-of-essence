@@ -7,7 +7,9 @@ const DEFAULT_PERCENTAGES = {
   base: 15,
 };
 
-let ESSENCES = [...LOCAL_ESSENCES];
+const collator = new Intl.Collator("it", { sensitivity: "base", usage: "sort" });
+
+let ESSENCES = prepareEssenceDataset(LOCAL_ESSENCES);
 const EXTERNAL_LIBRARY_ENDPOINTS = [
   "https://raw.githubusercontent.com/perfume-open-datasets/datasets/main/essences.json",
   "https://raw.githubusercontent.com/katarzynaq/perfume-library/main/library.json",
@@ -25,6 +27,52 @@ const state = {
   detailedComponents: [],
   analysis: null,
 };
+
+let persistTimeoutId = null;
+let ephemeralIdCounter = 0;
+
+function prepareEssenceDataset(source = []) {
+  return source.map(decorateEssence).sort((a, b) => collator.compare(a.name, b.name));
+}
+
+function decorateEssence(entry = {}) {
+  const essence = { ...entry };
+  essence.noteType = (essence.noteType || "heart").toLowerCase();
+  essence.source = essence.source || "naturale";
+  if (!essence.id) {
+    ephemeralIdCounter += 1;
+    const fallback = normalizeLabel(essence.name || "essenza");
+    essence.id = `${fallback || "essenza"}-${ephemeralIdCounter}`;
+  }
+  essence.searchIndex = buildEssenceSearchIndex(essence);
+  return essence;
+}
+
+function buildEssenceSearchIndex(essence = {}) {
+  const tokens = [
+    essence.name,
+    essence.family,
+    essence.noteType,
+    essence.source,
+    ...(essence.aliases || []),
+    ...(essence.descriptors || []),
+    ...(essence.facets || []),
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return normalizeSearchText(tokens);
+}
+
+function normalizeSearchText(value) {
+  if (!value && value !== 0) {
+    return "";
+  }
+  return value
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
 const FragranceAI = (() => {
   const IDEAL_DISTRIBUTION = { top: 28, heart: 44, base: 28 };
@@ -253,7 +301,7 @@ function init() {
   configurePdfWorker();
   rebuildEssenceIndex();
   renderFamilyPills();
-  renderEssenceList();
+  renderEssenceList.flush();
   bindEvents();
   setupManualOverrideTracking();
   if (elements.rating && elements.ratingOutput) {
@@ -310,6 +358,8 @@ function configurePdfWorker() {
 
 function bindEvents() {
   elements.searchInput?.addEventListener("input", renderEssenceList);
+  elements.essenceList?.addEventListener("click", handleEssenceListClick);
+  elements.essenceList?.addEventListener("keydown", handleEssenceListKeydown);
   elements.startBuilder?.addEventListener("click", startFormula);
   elements.heroLoadFormula?.addEventListener("click", () => openSavedModal({ focusImport: true }));
   elements.clearSelection?.addEventListener("click", clearComposition);
@@ -380,7 +430,11 @@ function resetAIOverrides() {
 function rebuildEssenceIndex() {
   essenceIndex.clear();
   essenceNameIndex.clear();
+  ESSENCES = ESSENCES.sort((a, b) => collator.compare(a.name, b.name));
   ESSENCES.forEach((essence) => {
+    if (!essence.searchIndex) {
+      essence.searchIndex = buildEssenceSearchIndex(essence);
+    }
     essenceIndex.set(essence.id, essence);
     essenceNameIndex.set(normalizeLabel(essence.name), essence);
     toArray(essence.aliases).forEach((alias) => {
@@ -389,57 +443,111 @@ function rebuildEssenceIndex() {
   });
 }
 
-function renderEssenceList() {
-  if (!elements.essenceList) return;
-  const term = elements.searchInput?.value?.toLowerCase().trim() ?? "";
-  const filtered = ESSENCES.filter((essence) => {
-    const haystack = [
-      essence.name,
-      essence.family,
-      essence.noteType,
-      essence.source,
-      ...(essence.descriptors || []),
-      ...(essence.facets || []),
-    ]
-      .join(" ")
-      .toLowerCase();
-    const matchesTerm = term.length === 0 || haystack.includes(term);
-    const matchesFamily =
-      state.activeFamilyFilter === "tutte" || essence.family === state.activeFamilyFilter;
-    return matchesTerm && matchesFamily;
-  }).sort((a, b) => a.name.localeCompare(b.name));
+const renderEssenceList = (() => {
+  let frameId = null;
 
-  elements.essenceList.innerHTML = "";
+  function performRender() {
+    if (!elements.essenceList) return;
 
-  if (filtered.length === 0) {
-    const li = document.createElement("li");
-    li.className = "essence essence--empty";
-    li.textContent = "Nessuna essenza trovata con i filtri attuali";
-    elements.essenceList.appendChild(li);
-    return;
+    const rawTerm = elements.searchInput?.value?.trim() ?? "";
+    const searchTerm = normalizeSearchText(rawTerm);
+    const hasTerm = searchTerm.length > 0;
+    const activeFamily = state.activeFamilyFilter;
+    const target = elements.essenceList;
+    const fragment = document.createDocumentFragment();
+    let rendered = 0;
+
+    target.innerHTML = "";
+
+    for (const essence of ESSENCES) {
+      if (hasTerm && !essence.searchIndex?.includes(searchTerm)) {
+        continue;
+      }
+      if (activeFamily !== "tutte" && essence.family !== activeFamily) {
+        continue;
+      }
+
+      const li = document.createElement("li");
+      li.className = "essence";
+      li.dataset.id = essence.id;
+      li.tabIndex = 0;
+      li.setAttribute("role", "button");
+      li.innerHTML = `
+        <div class="essence__name">
+          <span>${essence.name}</span>
+          <span class="badge">${essence.noteType.toUpperCase()}</span>
+        </div>
+        <div class="essence__meta">
+          <span>${essence.family}</span>
+          <span>${essence.source}</span>
+          <span>${formatDescriptors(essence)}</span>
+        </div>
+      `;
+      fragment.appendChild(li);
+      rendered += 1;
+    }
+
+    if (rendered === 0) {
+      const li = document.createElement("li");
+      li.className = "essence essence--empty";
+      li.textContent = "Nessuna essenza trovata con i filtri attuali";
+      target.appendChild(li);
+      return;
+    }
+
+    target.appendChild(fragment);
   }
 
-  filtered.forEach((essence) => {
-    const li = document.createElement("li");
-    li.className = "essence";
-    li.dataset.id = essence.id;
-    li.innerHTML = `
-      <div class="essence__name">
-        <span>${essence.name}</span>
-        <span class="badge">${essence.noteType.toUpperCase()}</span>
-      </div>
-      <div class="essence__meta">
-        <span>${essence.family}</span>
-        <span>${essence.source}</span>
-        <span>${formatDescriptors(essence)}</span>
-      </div>
-    `;
-
-    li.addEventListener("click", () => {
-      addEssenceToComposition(essence);
+  function scheduleRender() {
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+    frameId = requestAnimationFrame(() => {
+      frameId = null;
+      performRender();
     });
-    elements.essenceList.appendChild(li);
-  });
+  }
+
+  scheduleRender.flush = () => {
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+    performRender();
+  };
+
+  return scheduleRender;
+})();
+
+function handleEssenceListClick(event) {
+  const item = event.target.closest(".essence");
+  selectEssenceFromElement(item);
+}
+
+function handleEssenceListKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+  const item = event.target.closest(".essence");
+  if (!item) {
+    return;
+  }
+  event.preventDefault();
+  selectEssenceFromElement(item);
+}
+
+function selectEssenceFromElement(element) {
+  if (!element || element.classList.contains("essence--empty")) {
+    return;
+  }
+  const { id } = element.dataset;
+  if (!id) {
+    return;
+  }
+  const essence = essenceIndex.get(id);
+  if (essence) {
+    addEssenceToComposition(essence);
+  }
 }
 
 function formatDescriptors(essence) {
@@ -450,7 +558,7 @@ function formatDescriptors(essence) {
 function renderFamilyPills() {
   if (!elements.familyFilter) return;
   const uniqueFamilies = [...new Set(ESSENCES.map((essence) => essence.family))].sort((a, b) =>
-    a.localeCompare(b, "it")
+    collator.compare(a, b)
   );
   const families = ["tutte", ...uniqueFamilies];
   elements.familyFilter.innerHTML = "";
@@ -551,65 +659,89 @@ function clearComposition() {
   persistLastFormula();
 }
 
-function updateCompositionSummary() {
-  if (!elements.composition || !elements.compositionSummary) return;
-  const rows = [...elements.composition.querySelectorAll(".composition__row")];
-  if (rows.length === 0) {
-    clearComposition();
-    return;
+const updateCompositionSummary = (() => {
+  let frameId = null;
+
+  function performSummaryUpdate() {
+    if (!elements.composition || !elements.compositionSummary) return;
+    const rows = [...elements.composition.querySelectorAll(".composition__row")];
+    if (rows.length === 0) {
+      clearComposition();
+      return;
+    }
+
+    const volume = Number(formFields.volume.value) || 0;
+    const concentration = Number(formFields.concentration.value) || 0;
+    const density = Number(formFields.density.value) || 1;
+    const aromaticVolume = (volume * concentration) / 100;
+
+    const detailedComponents = rows.map((row) => {
+      const id = row.dataset.id;
+      const slider = row.querySelector("input[type='range']");
+      const percentage = Number(slider.value);
+      const ml = (aromaticVolume * percentage) / 100;
+      const grams = ml * density;
+      const drops = ml * DROPS_PER_ML;
+      const essence = essenceIndex.get(id) ?? { id, name: id, family: "—", noteType: "heart", source: "—" };
+
+      row.querySelector('[data-unit="ml"]').textContent = ml.toFixed(2);
+      row.querySelector('[data-unit="g"]').textContent = grams.toFixed(2);
+      row.querySelector('[data-unit="drops"]').textContent = Math.round(drops);
+
+      return {
+        id,
+        name: essence.name,
+        family: essence.family,
+        noteType: essence.noteType,
+        source: essence.source,
+        descriptors: essence.descriptors ?? [],
+        facets: essence.facets ?? [],
+        volatility: essence.volatility ?? 0.5,
+        intensity: essence.intensity ?? 0.6,
+        harmonies: essence.harmonies ?? [],
+        percentage,
+        ml: Number(ml.toFixed(3)),
+        grams: Number(grams.toFixed(3)),
+        drops: Math.round(drops),
+      };
+    });
+
+    state.detailedComponents = detailedComponents;
+
+    const totalPercentage = detailedComponents.reduce((sum, component) => sum + component.percentage, 0);
+    const remainder = Math.max(0, 100 - totalPercentage);
+    const summaryParts = [
+      `<span>${totalPercentage.toFixed(1)}% aroma</span>`,
+      remainder > 0 ? `${remainder.toFixed(1)}% disponibili` : "Bilanciato",
+      `${aromaticVolume.toFixed(2)} ml aroma totale`,
+    ];
+    elements.compositionSummary.innerHTML = summaryParts.join(" · ");
+
+    state.analysis = FragranceAI.analyze(detailedComponents, { volume, concentration, density });
+    applyAnalysis(state.analysis);
+    persistLastFormula();
   }
 
-  const volume = Number(formFields.volume.value) || 0;
-  const concentration = Number(formFields.concentration.value) || 0;
-  const density = Number(formFields.density.value) || 1;
-  const aromaticVolume = (volume * concentration) / 100;
+  function scheduleSummaryUpdate() {
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+    frameId = requestAnimationFrame(() => {
+      frameId = null;
+      performSummaryUpdate();
+    });
+  }
 
-  const detailedComponents = rows.map((row) => {
-    const id = row.dataset.id;
-    const slider = row.querySelector("input[type='range']");
-    const percentage = Number(slider.value);
-    const ml = (aromaticVolume * percentage) / 100;
-    const grams = ml * density;
-    const drops = ml * DROPS_PER_ML;
-    const essence = essenceIndex.get(id) ?? { id, name: id, family: "—", noteType: "heart", source: "—" };
+  scheduleSummaryUpdate.flush = () => {
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+    performSummaryUpdate();
+  };
 
-    row.querySelector('[data-unit="ml"]').textContent = ml.toFixed(2);
-    row.querySelector('[data-unit="g"]').textContent = grams.toFixed(2);
-    row.querySelector('[data-unit="drops"]').textContent = Math.round(drops);
-
-    return {
-      id,
-      name: essence.name,
-      family: essence.family,
-      noteType: essence.noteType,
-      source: essence.source,
-      descriptors: essence.descriptors ?? [],
-      facets: essence.facets ?? [],
-      volatility: essence.volatility ?? 0.5,
-      intensity: essence.intensity ?? 0.6,
-      harmonies: essence.harmonies ?? [],
-      percentage,
-      ml: Number(ml.toFixed(3)),
-      grams: Number(grams.toFixed(3)),
-      drops: Math.round(drops),
-    };
-  });
-
-  state.detailedComponents = detailedComponents;
-
-  const totalPercentage = detailedComponents.reduce((sum, component) => sum + component.percentage, 0);
-  const remainder = Math.max(0, 100 - totalPercentage);
-  const summaryParts = [
-    `<span>${totalPercentage.toFixed(1)}% aroma</span>`,
-    remainder > 0 ? `${remainder.toFixed(1)}% disponibili` : "Bilanciato",
-    `${aromaticVolume.toFixed(2)} ml aroma totale`,
-  ];
-  elements.compositionSummary.innerHTML = summaryParts.join(" · ");
-
-  state.analysis = FragranceAI.analyze(detailedComponents, { volume, concentration, density });
-  applyAnalysis(state.analysis);
-  persistLastFormula();
-}
+  return scheduleSummaryUpdate;
+})();
 
 function applyAnalysis(analysis) {
   if (!elements.rating || !elements.ratingOutput || !elements.olfactoryFamily) return;
@@ -738,23 +870,49 @@ function populateFormula(data) {
 }
 
 function handleSaveFormula() {
+  if (persistTimeoutId !== null) {
+    clearTimeout(persistTimeoutId);
+    persistTimeoutId = null;
+  }
   const formula = gatherFormulaState();
-  const stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem("god-of-essence:formulas") || "[]");
+  } catch (error) {
+    console.warn("Archivio formule corrotto, si procede con un reset", error);
+    stored = [];
+  }
   const index = stored.findIndex((item) => item.name === formula.name);
   if (index >= 0) {
     stored[index] = formula;
   } else {
     stored.push(formula);
   }
-  localStorage.setItem("god-of-essence:formulas", JSON.stringify(stored));
-  localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
+  try {
+    localStorage.setItem("god-of-essence:formulas", JSON.stringify(stored));
+    localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
+  } catch (error) {
+    console.error("Impossibile salvare la formula", error);
+    showToast("Salvataggio non riuscito, controlla lo spazio disponibile");
+    return;
+  }
   showToast(`Formula "${formula.name}" salvata`);
   openSaveReport(formula);
 }
 
 function persistLastFormula() {
-  const formula = gatherFormulaState();
-  localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
+  if (persistTimeoutId !== null) {
+    clearTimeout(persistTimeoutId);
+  }
+  persistTimeoutId = setTimeout(() => {
+    persistTimeoutId = null;
+    try {
+      const formula = gatherFormulaState();
+      localStorage.setItem("god-of-essence:last", JSON.stringify(formula));
+    } catch (error) {
+      console.warn("Impossibile salvare lo stato corrente", error);
+    }
+  }, 150);
 }
 
 function openSavedModal({ focusImport = false } = {}) {
@@ -1296,11 +1454,15 @@ function formatSliderValue(value) {
 
 function syncExternalLibraries() {
   if (!EXTERNAL_LIBRARY_ENDPOINTS.length) return;
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    updateSyncStatus("Offline, sincronizzazione sospesa", "offline");
+    return;
+  }
   updateSyncStatus("Sincronizzazione con archivi professionali…", "loading");
 
   Promise.allSettled(
     EXTERNAL_LIBRARY_ENDPOINTS.map((endpoint) =>
-      fetch(endpoint)
+      timedFetch(endpoint)
         .then((response) => {
           if (!response.ok) {
             throw new Error(`Status ${response.status}`);
@@ -1317,8 +1479,9 @@ function syncExternalLibraries() {
           const { endpoint, payload } = result.value;
           const extracted = extractExternalEssences(payload, endpoint);
           extracted.forEach((essence) => {
-            if (!essenceIndex.has(essence.id)) {
-              additions.push(essence);
+            const normalizedName = normalizeLabel(essence.name);
+            if (!essenceIndex.has(essence.id) && !essenceNameIndex.has(normalizedName)) {
+              additions.push(decorateEssence(essence));
             }
           });
         }
@@ -1329,7 +1492,7 @@ function syncExternalLibraries() {
         return;
       }
 
-      ESSENCES = [...ESSENCES, ...additions].sort((a, b) => a.name.localeCompare(b.name));
+      ESSENCES = [...ESSENCES, ...additions];
       rebuildEssenceIndex();
       renderFamilyPills();
       renderEssenceList();
@@ -1390,6 +1553,15 @@ function normalizeExternalEssence(raw, endpoint, index) {
     harmonies,
     externalSource: endpoint,
   };
+}
+
+function timedFetch(url, timeout = 7000) {
+  if (typeof AbortController === "function") {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+  }
+  return fetch(url);
 }
 
 function formatNumber(value) {
