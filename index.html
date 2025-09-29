@@ -170,18 +170,85 @@
               </label>
               <label>
                 Piramide olfattiva
-                <div class="pyramid" id="pyramid">
-                  <div>
-                    <h3>Note di Testa</h3>
-                    <textarea id="top-notes" rows="2" placeholder="Agrumi, Lavanda..."></textarea>
+                <div class="pyramid note-switcher" id="pyramid" data-note-switcher>
+                  <div
+                    class="note-switcher__tabs"
+                    role="tablist"
+                    aria-label="Categorie della piramide olfattiva"
+                  >
+                    <button
+                      type="button"
+                      class="note-switcher__tab note-switcher__tab--active"
+                      id="tab-top-notes"
+                      role="tab"
+                      aria-selected="true"
+                      aria-controls="panel-top-notes"
+                    >
+                      Note di Testa
+                    </button>
+                    <button
+                      type="button"
+                      class="note-switcher__tab"
+                      id="tab-heart-notes"
+                      role="tab"
+                      aria-selected="false"
+                      aria-controls="panel-heart-notes"
+                    >
+                      Note di Cuore
+                    </button>
+                    <button
+                      type="button"
+                      class="note-switcher__tab"
+                      id="tab-base-notes"
+                      role="tab"
+                      aria-selected="false"
+                      aria-controls="panel-base-notes"
+                    >
+                      Note di Fondo
+                    </button>
                   </div>
-                  <div>
-                    <h3>Note di Cuore</h3>
-                    <textarea id="heart-notes" rows="2" placeholder="Gelsomino, Rosa..."></textarea>
-                  </div>
-                  <div>
-                    <h3>Note di Fondo</h3>
-                    <textarea id="base-notes" rows="2" placeholder="Ambra, Patchouli..."></textarea>
+                  <div class="note-switcher__panels">
+                    <section
+                      id="panel-top-notes"
+                      class="note-switcher__panel"
+                      role="tabpanel"
+                      aria-labelledby="tab-top-notes"
+                    >
+                      <label class="note-switcher__label" for="top-notes">Note di Testa</label>
+                      <textarea
+                        id="top-notes"
+                        rows="2"
+                        placeholder="Agrumi, Lavanda..."
+                      ></textarea>
+                    </section>
+                    <section
+                      id="panel-heart-notes"
+                      class="note-switcher__panel"
+                      role="tabpanel"
+                      aria-labelledby="tab-heart-notes"
+                      hidden
+                    >
+                      <label class="note-switcher__label" for="heart-notes">Note di Cuore</label>
+                      <textarea
+                        id="heart-notes"
+                        rows="2"
+                        placeholder="Gelsomino, Rosa..."
+                      ></textarea>
+                    </section>
+                    <section
+                      id="panel-base-notes"
+                      class="note-switcher__panel"
+                      role="tabpanel"
+                      aria-labelledby="tab-base-notes"
+                      hidden
+                    >
+                      <label class="note-switcher__label" for="base-notes">Note di Fondo</label>
+                      <textarea
+                        id="base-notes"
+                        rows="2"
+                        placeholder="Ambra, Patchouli..."
+                      ></textarea>
+                    </section>
                   </div>
                 </div>
               </label>
@@ -276,6 +343,6 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.min.js"></script>
-    <script src="app.js" type="module"></script>
+    <script defer src="app.bundle.js"></script>
   </body>
 </html>
